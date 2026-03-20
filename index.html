@@ -8,16 +8,10 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --color-bg: #f9f8f4;
-      --color-surface: #ffffff;
-      --color-surface-2: #f1efe8;
-      --color-border: rgba(0,0,0,0.10);
-      --color-border-md: rgba(0,0,0,0.18);
-      --color-text-primary: #1a1a18;
-      --color-text-secondary: #5f5e5a;
-      --color-text-hint: #888780;
-      --radius-md: 8px;
-      --radius-lg: 12px;
+      --color-bg: #f9f8f4; --color-surface: #ffffff; --color-surface-2: #f1efe8;
+      --color-border: rgba(0,0,0,0.10); --color-border-md: rgba(0,0,0,0.18);
+      --color-text-primary: #1a1a18; --color-text-secondary: #5f5e5a; --color-text-hint: #888780;
+      --radius-md: 8px; --radius-lg: 12px;
       --font: 'Inter', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', 'Fira Mono', monospace;
     }
@@ -139,55 +133,23 @@
     <div class="stat"><div class="stat-label">Empirical mean (x̄)</div><div class="stat-val" id="sEmu">—</div></div>
     <div class="stat"><div class="stat-label">Empirical std</div><div class="stat-val" id="sEsig">—</div></div>
   </div>
-  <footer>Central Limit Theorem Explorer &mdash; built with Chart.js &middot; xoshiro256** RNG</footer>
+  <footer>Central Limit Theorem Explorer &mdash; built with Chart.js</footer>
 </div>
 
 <script>
-// ─── xoshiro256** PRNG ────────────────────────────────────────────────────────
-// Seeded from crypto.getRandomValues for true initial entropy.
-// All simulation randomness routes through this generator.
-// References: Blackman & Vigna 2019; https://prng.di.unimi.it/
-const _s = new Uint32Array(8);
-(function seedXoshiro() {
-  crypto.getRandomValues(_s);
-  // Ensure state is never all-zero
-  if (_s.every(v => v === 0)) _s[0] = 1;
-})();
-
-function _rotl32(x, k) { return (x << k) | (x >>> (32 - k)); }
-
-// Returns a float in [0, 1) using the upper 53 bits of two 32-bit words
+// ── Splitmix32 PRNG ──────────────────────────────────────────────────────────
+// Simple, fast, correct 32-bit PRNG. Seeded from crypto.getRandomValues.
+// Far better statistical quality than Math.random() for Monte Carlo use.
+let _sm = (crypto.getRandomValues(new Uint32Array(1))[0]) >>> 0;
 function rand() {
-  // xoshiro256** operates on 64-bit words; we simulate with pairs of 32-bit
-  // Indices: s[0..1]=w0, s[2..3]=w1, s[4..5]=w2, s[6..7]=w3
-  const s0h=_s[0],s0l=_s[1], s1h=_s[2],s1l=_s[3];
-  const s2h=_s[4],s2l=_s[5], s3h=_s[6],s3l=_s[7];
-
-  // result = rotl(s1 * 5, 7) * 9  (** scrambler on s1)
-  // multiply s1 by 5 (64-bit)
-  let mh = Math.imul(s1h,5) + Math.imul(s1l>>>16, 5)>>>0;
-  let ml = Math.imul(s1l,5)>>>0;
-  mh = (mh + (ml >>> 16)) >>> 0; ml = ml >>> 0;
-  // rotl64 by 7
-  const rh = ((mh << 7) | (ml >>> 25)) >>> 0;
-  const rl = ((ml << 7) | (mh >>> 25)) >>> 0;
-  // multiply by 9
-  let rh9 = (Math.imul(rh,9) + (Math.imul(rl>>>16,9)))>>>0;
-  let rl9 = Math.imul(rl,9)>>>0;
-  rh9 = (rh9 + (rl9>>>16))>>>0;
-
-  // xoshiro state update
-  const th=s1h^s0h, tl=s1l^s0l;
-  _s[2]=th^s2h^(s0h<<17|(s0l>>>15)); _s[3]=tl^s2l^(s0l<<17|(s0h>>>15));
-  _s[4]=(s2h<<45|s2l>>>19)^th; _s[5]=(s2l<<45|s2h>>>19)^tl;
-  _s[6]=(_rotl32(s3h,10)^s3h^s1h); _s[7]=(_rotl32(s3l,10)^s3l^s1l);
-  _s[0]=s2h^s3h; _s[1]=s2l^s3l;
-
-  // Convert top 53 bits to float in [0,1)
-  // Use rh9 (upper 32) and rl9 (lower 32), take upper 53 bits
-  return (rh9 * 0x200000 + (rl9 >>> 11)) / 0x20000000000000;
+  _sm = (_sm + 0x9e3779b9) >>> 0;
+  let z = _sm;
+  z = Math.imul(z ^ (z >>> 16), 0x85ebca6b) >>> 0;
+  z = Math.imul(z ^ (z >>> 13), 0xc2b2ae35) >>> 0;
+  z = (z ^ (z >>> 16)) >>> 0;
+  return z / 0x100000000;  // [0, 1)
 }
-// ─────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
 
 const DISTS=[{key:'uniform',label:'Uniform'},{key:'exponential',label:'Exponential'},{key:'beta',label:'Beta'},{key:'lognormal',label:'Log-normal'},{key:'binomial',label:'Binomial'},{key:'poisson',label:'Poisson'}];
 const SPEEDS=[{label:'Slow',ms:300},{label:'Med',ms:80},{label:'Fast',ms:16},{label:'Max',ms:0}];
@@ -199,12 +161,12 @@ const SPEEDS=[{label:'Slow',ms:300},{label:'Med',ms:80},{label:'Fast',ms:16},{la
   SPEEDS.forEach((s,i)=>{const b=document.createElement('button');b.className='sbtn'+(i===1?' on':'');b.dataset.ms=s.ms;b.textContent=s.label;sc.appendChild(b);});
 })();
 
-// ─── Distribution samplers (all use rand() not Math.random()) ────────────────
+// ── Random variate generators (all use rand()) ───────────────────────────────
 function bm() {
-  // Box-Muller exact normal; rand() replaces Math.random()
+  // Box-Muller exact normal transform
   let u, v;
-  do { u = rand(); } while (!u);
-  do { v = rand(); } while (!v);
+  do { u = rand(); } while (u === 0);
+  do { v = rand(); } while (v === 0);
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 
@@ -234,14 +196,14 @@ function rp(l) {
 function lgam(z) {
   const g=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,1.208650973866179e-3,-5.395239384953e-6];
   let x=z,y=z,t=x+5.5,s=1.000000000190015;
-  t-=(x+0.5)*Math.log(t);
-  for(let j=0;j<6;j++)s+=g[j]/++y;
-  return -t+Math.log(2.5066282746310005*s/x);
+  t -= (x + 0.5) * Math.log(t);
+  for (let j=0;j<6;j++) s += g[j] / ++y;
+  return -t + Math.log(2.5066282746310005 * s / x);
 }
 function lb(a,b){return lgam(a)+lgam(b)-lgam(a+b);}
 function lfc(n,k){return lgam(n+1)-lgam(k+1)-lgam(n-k+1);}
 function lfact(n){return lgam(n+1);}
-function npdf(x,mu,s){return Math.exp(-0.5*Math.pow((x-mu)/s,2))/(s*Math.sqrt(2*Math.PI));}
+function npdf(x,mu,s){return Math.exp(-0.5*((x-mu)/s)**2)/(s*Math.sqrt(2*Math.PI));}
 function isDark(){return matchMedia('(prefers-color-scheme:dark)').matches;}
 function gc(){return isDark()?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';}
 function tc(){return isDark()?'#94a3b8':'#64748b';}
@@ -261,7 +223,7 @@ const D={
     s(p){return Math.exp(p.lmu+p.lsig*bm());},mu(p){return Math.exp(p.lmu+p.lsig*p.lsig/2);},
     sig(p){const m=Math.exp(p.lmu+p.lsig*p.lsig/2);return m*Math.sqrt(Math.exp(p.lsig*p.lsig)-1);},
     xr(p){return[0,Math.exp(p.lmu+3.5*p.lsig)];},
-    pdf(x,p){if(x<=0)return 0;return Math.exp(-Math.pow(Math.log(x)-p.lmu,2)/(2*p.lsig*p.lsig))/(x*p.lsig*Math.sqrt(2*Math.PI));},t:'c'},
+    pdf(x,p){if(x<=0)return 0;return Math.exp(-((Math.log(x)-p.lmu)**2)/(2*p.lsig*p.lsig))/(x*p.lsig*Math.sqrt(2*Math.PI));},t:'c'},
   binomial:{params:[{id:'bn',label:'Trials (n)',min:1,max:30,step:1,def:10},{id:'bp',label:'Prob (p)',min:0.01,max:0.99,step:0.01,def:0.3}],
     s(p){let s=0;for(let i=0;i<p.bn;i++)if(rand()<p.bp)s++;return s;},
     mu(p){return p.bn*p.bp;},sig(p){return Math.sqrt(p.bn*p.bp*(1-p.bp));},
@@ -291,9 +253,9 @@ function buildPopChart(){
     const N=120,pdfPts=[];cachedMaxPdf=0;
     for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N,y=dist.pdf(x,p);pdfPts.push({x,y});if(y>cachedMaxPdf)cachedMaxPdf=y;}
     popChart=new Chart(ctx,{type:'scatter',data:{datasets:[
-      {label:'pdf',type:'line',data:pdfPts,borderColor:'#5DCAA5',borderWidth:2,backgroundColor:'rgba(93,202,165,0.15)',fill:true,pointRadius:0,tension:0.3,order:3,parsing:false},
-      {label:'dots',data:[],backgroundColor:'rgba(239,159,39,0.85)',borderColor:'#BA7517',borderWidth:1,pointRadius:5,order:1,parsing:false},
-      {label:'meanline',data:[],borderColor:'#D85A30',borderWidth:2.5,borderDash:[6,4],pointRadius:0,showLine:true,fill:false,order:2,parsing:false}
+      {type:'line',data:pdfPts,borderColor:'#5DCAA5',borderWidth:2,backgroundColor:'rgba(93,202,165,0.15)',fill:true,pointRadius:0,tension:0.3,order:3,parsing:false},
+      {data:[],backgroundColor:'rgba(239,159,39,0.85)',borderColor:'#BA7517',borderWidth:1,pointRadius:5,order:1,parsing:false},
+      {data:[],borderColor:'#D85A30',borderWidth:2.5,borderDash:[6,4],pointRadius:0,showLine:true,fill:false,order:2,parsing:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},
       scales:{x:{...a,type:'linear',min:x0,max:x1},y:{...a,beginAtZero:true}},animation:false}});
   } else {
@@ -315,11 +277,16 @@ function setPopOverlay(pts,mean){
     ds[1].data=pts?pts.map(v=>({x:v,y:0})):[];
     ds[2].data=mean!=null?[{x:mean,y:0},{x:mean,y:cachedMaxPdf*1.12}]:[];
   } else {
-    if(pts){const counts={};pts.forEach(v=>{const k=Math.round(v);counts[k]=(counts[k]||0)+1;});
+    if(pts){
+      const counts={};pts.forEach(v=>{const k=Math.round(v);counts[k]=(counts[k]||0)+1;});
       ds[1].data=cachedKs.map((k,i)=>{const cnt=counts[parseInt(k)]||0;return cnt?{x:i,y:cachedPmfData[i]+0.01+(cnt*0.008)}:null;}).filter(Boolean);
     }else{ds[1].data=[];}
-    if(mean!=null){const x0k=parseInt(cachedKs[0]),ni=Math.round(mean-x0k),ml=new Array(cachedKs.length).fill(null);if(ni>=0&&ni<cachedKs.length)ml[ni]=cachedMaxPmf*1.12;ds[2].data=ml;}
-    else{ds[2].data=new Array(cachedKs.length).fill(null);}
+    if(mean!=null){
+      const ni=Math.round(mean-parseInt(cachedKs[0]));
+      const ml=new Array(cachedKs.length).fill(null);
+      if(ni>=0&&ni<cachedKs.length)ml[ni]=cachedMaxPmf*1.12;
+      ds[2].data=ml;
+    }else{ds[2].data=new Array(cachedKs.length).fill(null);}
   }
   popChart.update('none');
 }
@@ -343,19 +310,24 @@ function updateMeansChart(){
   }
   const mu=dist.mu(p),sig=dist.sig(p),clt=sig/Math.sqrt(state.n);
 
-  // ── FIX: use FIXED THEORETICAL window μ ± 4.5·(σ/√n) ──────────────────────
-  // This prevents outliers from stretching the x-axis and causing apparent skew.
-  // The window is centered on the true mean and symmetric by construction,
-  // so the normal overlay always sits perfectly over the histogram.
-  const halfW = 4.5 * clt;
-  const x0 = mu - halfW, x1 = mu + halfW;
-  // ──────────────────────────────────────────────────────────────────────────
+  // Fixed theoretical window: μ ± 4.5·(σ/√n)
+  // Symmetric by construction — prevents outliers from stretching the axis
+  // and creating false visual skewness
+  const halfW=4.5*clt;
+  const x0=mu-halfW, x1=mu+halfW;
 
-  const nB=50, bw=(x1-x0)/nB, bins=new Array(nB).fill(0);
+  const nB=50,bw=(x1-x0)/nB,bins=new Array(nB).fill(0);
   ms.forEach(m=>{const bi=Math.floor((m-x0)/bw);if(bi>=0&&bi<nB)bins[bi]++;});
   const tot=ms.length,lbs=[],dens=[],norm=[];
-  for(let i=0;i<nB;i++){const cx=x0+(i+0.5)*bw;lbs.push(cx.toFixed(3));dens.push(bins[i]/(tot*bw));norm.push(npdf(cx,mu,clt));}
-  meansChart.data.labels=lbs;meansChart.data.datasets[0].data=dens;meansChart.data.datasets[1].data=norm;
+  for(let i=0;i<nB;i++){
+    const cx=x0+(i+0.5)*bw;
+    lbs.push(cx.toFixed(3));
+    dens.push(bins[i]/(tot*bw));
+    norm.push(npdf(cx,mu,clt));
+  }
+  meansChart.data.labels=lbs;
+  meansChart.data.datasets[0].data=dens;
+  meansChart.data.datasets[1].data=norm;
   meansChart.update('none');
   document.getElementById('meansLabel').textContent=`${tot.toLocaleString()} samples · n=${state.n}`;
   updateStats();
@@ -421,7 +393,10 @@ function startAnim(){
   if(!cfg.overlay){setPopOverlay(null,null);document.getElementById('stepInfo').textContent='';}
   state.timer=setInterval(()=>{
     for(let i=0;i<cfg.batch;i++)drawOne();
-    if(cfg.overlay){setPopOverlay(state.lastSample,state.lastMean);document.getElementById('stepInfo').textContent=`Sample #${state.means.length}: n=${state.n} draws · x̄ = ${state.lastMean.toFixed(4)}`;}
+    if(cfg.overlay){
+      setPopOverlay(state.lastSample,state.lastMean);
+      document.getElementById('stepInfo').textContent=`Sample #${state.means.length}: n=${state.n} draws · x̄ = ${state.lastMean.toFixed(4)}`;
+    }
     updateMeansChart();
   },cfg.interval);
 }
