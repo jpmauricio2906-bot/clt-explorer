@@ -486,18 +486,6 @@ function initMeansChart(){
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:a,y:a},animation:false}});
 }
 
-function computeBins(isDiscrete,n,mu,clt){
-  const halfW=4.5*clt,x0=mu-halfW,x1=mu+halfW,windowW=x1-x0;
-  if(!isDiscrete){const nB=50,bw=windowW/nB;return{x0,bw,nB,discrete:false};}
-  const step=1/n;
-  let k=Math.max(1,Math.round(windowW/(step*50)));
-  let bw=k*step;
-  let alignedX0=Math.round(Math.floor(x0/bw)*bw/step)*step;
-  let nB=Math.ceil((x1-alignedX0)/bw)+2;
-  if(nB>80){k=Math.ceil(windowW/(step*80));bw=k*step;alignedX0=Math.round(Math.floor(x0/bw)*bw/step)*step;nB=Math.ceil((x1-alignedX0)/bw)+2;}
-  return{x0:alignedX0,bw,nB,discrete:true};
-}
-
 function updateMeansChart(){
   if(!meansChart)return;
   const dist=D[state.key],p=state.params,ms=state.means;
@@ -505,18 +493,56 @@ function updateMeansChart(){
     meansChart.data.labels=[];meansChart.data.datasets[0].data=[];meansChart.data.datasets[1].data=[];
     meansChart.update('none');document.getElementById('meansLabel').textContent='No samples yet';updateStats();return;
   }
-  const mu=dist.mu(p),sig=dist.sig(p),clt=sig/Math.sqrt(state.n);
-  const{x0,bw,nB,discrete}=computeBins(dist.t==='d',state.n,mu,clt);
-  const bins=new Array(nB).fill(0);
-  ms.forEach(m=>{
-    const bi=discrete?Math.round((m-x0)/bw):Math.floor((m-x0)/bw);
-    if(bi>=0&&bi<nB)bins[bi]++;
-  });
+  const mu=dist.mu(p),sig=dist.sig(p),n=state.n,clt=sig/Math.sqrt(n);
   const tot=ms.length,lbs=[],dens=[],norm=[];
-  for(let i=0;i<nB;i++){
-    const cx=discrete?x0+i*bw:x0+(i+0.5)*bw;
-    lbs.push(cx.toFixed(3));dens.push(bins[i]/(tot*bw));norm.push(npdf(cx,mu,clt));
+
+  if(dist.t==='d'){
+    // ── Integer-space binning for discrete distributions ────────────────────
+    // Means are k/n for integer k. Work entirely in integer sums S = round(m*n)
+    // to avoid floating-point misalignment (the root cause of the spike pattern).
+    const halfW=4.5*clt;
+    const S_lo=Math.round((mu-halfW)*n);  // integer lower bound
+    const S_hi=Math.round((mu+halfW)*n);  // integer upper bound
+    const windowSteps=S_hi-S_lo;
+
+    // Choose integer bin width k so we get ~50 bins
+    const k=Math.max(1,Math.round(windowSteps/50));
+    // Align S_lo down to nearest multiple of k
+    const S0=Math.floor(S_lo/k)*k;
+    const nB=Math.ceil((S_hi-S0)/k)+1;
+
+    const bins=new Array(nB).fill(0);
+    ms.forEach(m=>{
+      const S=Math.round(m*n);          // exact integer, no float error
+      const bi=Math.floor((S-S0)/k);    // integer division, exact
+      if(bi>=0&&bi<nB)bins[bi]++;
+    });
+
+    const bw=k/n;  // bin width in x̄ units (for density)
+    for(let i=0;i<nB;i++){
+      // Center label: midpoint of integer range [S0+i*k, S0+(i+1)*k-1]
+      const cx=(S0+(i+0.5)*k)/n;
+      lbs.push(cx.toFixed(3));
+      dens.push(bins[i]/(tot*bw));
+      norm.push(npdf(cx,mu,clt));
+    }
+  } else {
+    // ── Float binning for continuous distributions ──────────────────────────
+    const halfW=4.5*clt,x0=mu-halfW,x1=mu+halfW,windowW=x1-x0;
+    const nB=50,bw=windowW/nB;
+    const bins=new Array(nB).fill(0);
+    ms.forEach(m=>{
+      const bi=Math.floor((m-x0)/bw);
+      if(bi>=0&&bi<nB)bins[bi]++;
+    });
+    for(let i=0;i<nB;i++){
+      const cx=x0+(i+0.5)*bw;
+      lbs.push(cx.toFixed(3));
+      dens.push(bins[i]/(tot*bw));
+      norm.push(npdf(cx,mu,clt));
+    }
   }
+
   meansChart.data.labels=lbs;meansChart.data.datasets[0].data=dens;meansChart.data.datasets[1].data=norm;
   meansChart.update('none');
   document.getElementById('meansLabel').textContent=`${tot.toLocaleString()} samples · n=${state.n}`;
