@@ -7,7 +7,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --color-bg: #f9f8f4;
       --color-surface: #ffffff;
@@ -17,14 +16,11 @@
       --color-text-primary: #1a1a18;
       --color-text-secondary: #5f5e5a;
       --color-text-hint: #888780;
-      --color-info-bg: #e6f1fb;
-      --color-info-text: #185FA5;
       --radius-md: 8px;
       --radius-lg: 12px;
       --font: 'Inter', system-ui, -apple-system, sans-serif;
       --font-mono: 'JetBrains Mono', 'Fira Mono', monospace;
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
         --color-bg: #1a1a18;
@@ -35,211 +31,59 @@
         --color-text-primary: #f1efe8;
         --color-text-secondary: #b4b2a9;
         --color-text-hint: #888780;
-        --color-info-bg: #0c447c22;
-        --color-info-text: #85B7EB;
       }
     }
-
-    body {
-      font-family: var(--font);
-      background: var(--color-bg);
-      color: var(--color-text-primary);
-      min-height: 100vh;
-      padding: 2rem 1rem 4rem;
-    }
-
-    .page {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    header {
-      margin-bottom: 2rem;
-      padding-bottom: 1.25rem;
-      border-bottom: 0.5px solid var(--color-border);
-    }
-
-    header h1 {
-      font-size: 24px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
-
-    header p {
-      font-size: 14px;
-      color: var(--color-text-secondary);
-      line-height: 1.6;
-    }
-
-    .section-label {
-      font-size: 11px;
-      color: var(--color-text-hint);
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      margin-bottom: 10px;
-    }
-
-    /* Distribution buttons */
+    body { font-family: var(--font); background: var(--color-bg); color: var(--color-text-primary); min-height: 100vh; padding: 2rem 1rem 4rem; }
+    .page { max-width: 900px; margin: 0 auto; }
+    header { margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 0.5px solid var(--color-border); }
+    header h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+    header p { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; }
+    .section-label { font-size: 11px; color: var(--color-text-hint); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
     .dist-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
-
-    .dbtn {
-      cursor: pointer;
-      padding: 6px 15px;
-      border-radius: var(--radius-md);
-      border: 1.5px solid var(--color-border-md);
-      background: var(--color-surface);
-      font-size: 13px;
-      color: var(--color-text-secondary);
-      font-family: var(--font);
-      transition: background .12s, color .12s, border-color .12s;
-    }
+    .dbtn { cursor: pointer; padding: 6px 15px; border-radius: var(--radius-md); border: 1.5px solid var(--color-border-md); background: var(--color-surface); font-size: 13px; color: var(--color-text-secondary); font-family: var(--font); transition: background .12s, color .12s, border-color .12s; }
     .dbtn:hover { background: var(--color-surface-2); color: var(--color-text-primary); }
     .dbtn.on { background: #0F6E56; color: #fff; border-color: #0F6E56; font-weight: 500; }
-
-    /* Controls panel */
-    .controls {
-      background: var(--color-surface-2);
-      border-radius: var(--radius-lg);
-      padding: 16px 18px;
-      margin-bottom: 1.5rem;
-      display: flex;
-      gap: 32px;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-
+    .controls { background: var(--color-surface-2); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 1.5rem; display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
     .params { flex: 1; min-width: 260px; }
-
-    .prow {
-      display: grid;
-      grid-template-columns: 135px 1fr 52px;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+    .prow { display: grid; grid-template-columns: 135px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 10px; }
     .prow:last-child { margin-bottom: 0; }
-
     .plabel { font-size: 12px; color: var(--color-text-secondary); }
     .pval { font-size: 12px; font-weight: 500; color: var(--color-text-primary); text-align: right; font-family: var(--font-mono); }
-
-    input[type=range] {
-      width: 100%;
-      accent-color: #0F6E56;
-      cursor: pointer;
-    }
-
+    input[type=range] { width: 100%; accent-color: #0F6E56; cursor: pointer; }
     .right-controls { display: flex; flex-direction: column; gap: 14px; }
-
     .spd-row { display: flex; gap: 6px; }
-
-    .sbtn {
-      cursor: pointer;
-      padding: 5px 13px;
-      border-radius: var(--radius-md);
-      border: 1.5px solid var(--color-border-md);
-      background: var(--color-surface);
-      font-size: 12px;
-      color: var(--color-text-secondary);
-      font-family: var(--font);
-    }
+    .sbtn { cursor: pointer; padding: 5px 13px; border-radius: var(--radius-md); border: 1.5px solid var(--color-border-md); background: var(--color-surface); font-size: 12px; color: var(--color-text-secondary); font-family: var(--font); }
     .sbtn:hover { background: var(--color-surface-2); color: var(--color-text-primary); }
     .sbtn.on { background: #185FA5; color: #fff; border-color: #185FA5; font-weight: 500; }
-
     .action-row { display: flex; gap: 6px; }
-
-    .abtn {
-      cursor: pointer;
-      padding: 7px 17px;
-      border-radius: var(--radius-md);
-      border: 1.5px solid var(--color-border-md);
-      background: var(--color-surface);
-      font-size: 13px;
-      color: var(--color-text-primary);
-      font-family: var(--font);
-      transition: background .1s;
-    }
+    .abtn { cursor: pointer; padding: 7px 17px; border-radius: var(--radius-md); border: 1.5px solid var(--color-border-md); background: var(--color-surface); font-size: 13px; color: var(--color-text-primary); font-family: var(--font); transition: background .1s; }
     .abtn:hover { background: var(--color-surface-2); }
     .abtn.go { background: #0F6E56; color: #fff; border-color: #0F6E56; }
     .abtn.go:hover { opacity: .88; }
-
-    /* Charts */
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-bottom: 12px;
-    }
-
-    @media (max-width: 600px) {
-      .charts-grid { grid-template-columns: 1fr; }
-    }
-
-    .chart-wrap {}
-
-    .chart-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 6px;
-    }
-
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 12px; }
+    @media (max-width: 600px) { .charts-grid { grid-template-columns: 1fr; } }
+    .chart-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
     .chart-title { font-size: 13px; font-weight: 500; }
     .chart-sub { font-size: 11px; color: var(--color-text-secondary); }
     .step-info { font-size: 11px; color: var(--color-text-secondary); min-height: 14px; margin-bottom: 6px; }
-
     .canvas-wrap { position: relative; height: 220px; }
-
-    /* Legend */
-    .legend {
-      display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-bottom: 1.25rem;
-      font-size: 12px;
-      color: var(--color-text-secondary);
-    }
+    .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 1.25rem; font-size: 12px; color: var(--color-text-secondary); }
     .legend span { display: flex; align-items: center; gap: 6px; }
     .leg-sq { width: 12px; height: 10px; border-radius: 2px; display: inline-block; }
     .leg-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     .leg-line { width: 18px; border-top: 2px solid #D85A30; display: inline-block; }
     .leg-dash { width: 18px; border-top: 2px dashed #D85A30; display: inline-block; }
-
-    /* Stats */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-    }
-
-    @media (max-width: 700px) {
-      .stats-grid { grid-template-columns: repeat(3, 1fr); }
-    }
-    @media (max-width: 400px) {
-      .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .stat {
-      background: var(--color-surface-2);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-    }
+    .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 400px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat { background: var(--color-surface-2); border-radius: var(--radius-md); padding: 10px 12px; }
     .stat-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 5px; line-height: 1.3; }
     .stat-val { font-size: 16px; font-weight: 500; font-family: var(--font-mono); }
-
-    footer {
-      margin-top: 3rem;
-      padding-top: 1rem;
-      border-top: 0.5px solid var(--color-border);
-      font-size: 12px;
-      color: var(--color-text-hint);
-      text-align: center;
-    }
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 0.5px solid var(--color-border); font-size: 12px; color: var(--color-text-hint); text-align: center; }
   </style>
 </head>
 <body>
 <div class="page">
-
   <header>
     <h1>Central Limit Theorem Explorer</h1>
     <p>Draw samples from any distribution — watch their means converge to a normal distribution.</p>
@@ -307,7 +151,6 @@
   </div>
 
   <footer>Central Limit Theorem Explorer &mdash; built with Chart.js</footer>
-
 </div>
 
 <script>
@@ -335,24 +178,28 @@ function gc(){return isDark()?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)';}
 function tc(){return isDark()?'#94a3b8':'#64748b';}
 
 const D={
-  uniform:{name:'Uniform',params:[{id:'a',label:'Min (a)',min:-5,max:4.9,step:0.1,def:0},{id:'b',label:'Max (b)',min:-4.9,max:5,step:0.1,def:1}],
-    s(p){return p.a+Math.random()*(p.b-p.a);},mu(p){return(p.a+p.b)/2;},sig(p){return(p.b-p.a)/Math.sqrt(12);},xr(p){return[p.a,p.b];},pdf(x,p){return x>=p.a&&x<=p.b?1/(p.b-p.a):0;},t:'c'},
-  exponential:{name:'Exponential',params:[{id:'rate',label:'Rate (λ)',min:0.1,max:5,step:0.1,def:1}],
-    s(p){return-Math.log(1-Math.random())/p.rate;},mu(p){return 1/p.rate;},sig(p){return 1/p.rate;},xr(p){return[0,6/p.rate];},pdf(x,p){return x>=0?p.rate*Math.exp(-p.rate*x):0;},t:'c'},
-  beta:{name:'Beta',params:[{id:'alpha',label:'Shape (α)',min:0.5,max:8,step:0.1,def:2},{id:'beta_',label:'Shape (β)',min:0.5,max:8,step:0.1,def:5}],
+  uniform:{params:[{id:'a',label:'Min (a)',min:-5,max:4.9,step:0.1,def:0},{id:'b',label:'Max (b)',min:-4.9,max:5,step:0.1,def:1}],
+    s(p){return p.a+Math.random()*(p.b-p.a);},mu(p){return(p.a+p.b)/2;},sig(p){return(p.b-p.a)/Math.sqrt(12);},
+    xr(p){return[p.a,p.b];},pdf(x,p){return x>=p.a&&x<=p.b?1/(p.b-p.a):0;},t:'c'},
+  exponential:{params:[{id:'rate',label:'Rate (λ)',min:0.1,max:5,step:0.1,def:1}],
+    s(p){return-Math.log(1-Math.random())/p.rate;},mu(p){return 1/p.rate;},sig(p){return 1/p.rate;},
+    xr(p){return[0,6/p.rate];},pdf(x,p){return x>=0?p.rate*Math.exp(-p.rate*x):0;},t:'c'},
+  beta:{params:[{id:'alpha',label:'Shape (α)',min:0.5,max:8,step:0.1,def:2},{id:'beta_',label:'Shape (β)',min:0.5,max:8,step:0.1,def:5}],
     s(p){return rb(p.alpha,p.beta_);},mu(p){return p.alpha/(p.alpha+p.beta_);},
-    sig(p){const ab=p.alpha+p.beta_;return Math.sqrt(p.alpha*p.beta_/(ab*ab*(ab+1)));},xr(){return[0,1];},
-    pdf(x,p){if(x<=0||x>=1)return 0;return Math.exp((p.alpha-1)*Math.log(x)+(p.beta_-1)*Math.log(1-x)-lb(p.alpha,p.beta_));},t:'c'},
-  lognormal:{name:'Log-normal',params:[{id:'lmu',label:'Log-mean (μ)',min:-1,max:2,step:0.1,def:0},{id:'lsig',label:'Log-std (σ)',min:0.1,max:1.5,step:0.05,def:0.5}],
+    sig(p){const ab=p.alpha+p.beta_;return Math.sqrt(p.alpha*p.beta_/(ab*ab*(ab+1)));},
+    xr(){return[0,1];},pdf(x,p){if(x<=0||x>=1)return 0;return Math.exp((p.alpha-1)*Math.log(x)+(p.beta_-1)*Math.log(1-x)-lb(p.alpha,p.beta_));},t:'c'},
+  lognormal:{params:[{id:'lmu',label:'Log-mean (μ)',min:-1,max:2,step:0.1,def:0},{id:'lsig',label:'Log-std (σ)',min:0.1,max:1.5,step:0.05,def:0.5}],
     s(p){return Math.exp(p.lmu+p.lsig*bm());},mu(p){return Math.exp(p.lmu+p.lsig*p.lsig/2);},
-    sig(p){const m=Math.exp(p.lmu+p.lsig*p.lsig/2);return m*Math.sqrt(Math.exp(p.lsig*p.lsig)-1);},xr(p){return[0,Math.exp(p.lmu+3.5*p.lsig)];},
+    sig(p){const m=Math.exp(p.lmu+p.lsig*p.lsig/2);return m*Math.sqrt(Math.exp(p.lsig*p.lsig)-1);},
+    xr(p){return[0,Math.exp(p.lmu+3.5*p.lsig)];},
     pdf(x,p){if(x<=0)return 0;return Math.exp(-Math.pow(Math.log(x)-p.lmu,2)/(2*p.lsig*p.lsig))/(x*p.lsig*Math.sqrt(2*Math.PI));},t:'c'},
-  binomial:{name:'Binomial',params:[{id:'bn',label:'Trials (n)',min:1,max:30,step:1,def:10},{id:'bp',label:'Prob (p)',min:0.01,max:0.99,step:0.01,def:0.3}],
+  binomial:{params:[{id:'bn',label:'Trials (n)',min:1,max:30,step:1,def:10},{id:'bp',label:'Prob (p)',min:0.01,max:0.99,step:0.01,def:0.3}],
     s(p){let s=0;for(let i=0;i<p.bn;i++)if(Math.random()<p.bp)s++;return s;},
-    mu(p){return p.bn*p.bp;},sig(p){return Math.sqrt(p.bn*p.bp*(1-p.bp));},xr(p){return[0,p.bn];},
-    pmf(k,p){k=Math.round(k);if(k<0||k>p.bn)return 0;return Math.exp(lfc(p.bn,k)+k*Math.log(p.bp)+(p.bn-k)*Math.log(1-p.bp));},t:'d'},
-  poisson:{name:'Poisson',params:[{id:'lam',label:'Rate (λ)',min:0.5,max:15,step:0.5,def:3}],
-    s(p){return rp(p.lam);},mu(p){return p.lam;},sig(p){return Math.sqrt(p.lam);},xr(p){return[0,Math.ceil(p.lam+5*Math.sqrt(p.lam))];},
+    mu(p){return p.bn*p.bp;},sig(p){return Math.sqrt(p.bn*p.bp*(1-p.bp));},
+    xr(p){return[0,p.bn];},pmf(k,p){k=Math.round(k);if(k<0||k>p.bn)return 0;return Math.exp(lfc(p.bn,k)+k*Math.log(p.bp)+(p.bn-k)*Math.log(1-p.bp));},t:'d'},
+  poisson:{params:[{id:'lam',label:'Rate (λ)',min:0.5,max:15,step:0.5,def:3}],
+    s(p){return rp(p.lam);},mu(p){return p.lam;},sig(p){return Math.sqrt(p.lam);},
+    xr(p){return[0,Math.ceil(p.lam+5*Math.sqrt(p.lam))];},
     pmf(k,p){k=Math.round(k);if(k<0)return 0;return Math.exp(-p.lam+k*Math.log(p.lam)-lfact(k));},t:'d'}
 };
 
@@ -361,7 +208,7 @@ function spd(){return SPD_CFG[state.speed]||SPD_CFG[16];}
 
 const state={key:'uniform',params:{a:0,b:1},n:30,speed:80,means:[],running:false,timer:null,lastSample:null,lastMean:null};
 let popChart=null,meansChart=null;
-let cachedXr=null,cachedMaxPdf=0,cachedKs=null,cachedPmfData=null,cachedMaxPmf=0;
+let cachedMaxPdf=0,cachedKs=null,cachedPmfData=null,cachedMaxPmf=0;
 
 function ax(){return{color:tc(),ticks:{color:tc(),maxTicksLimit:6,font:{size:11}},grid:{color:gc()}};}
 
@@ -370,45 +217,83 @@ function buildPopChart(){
   const dist=D[state.key],p=state.params;
   const ctx=document.getElementById('popChart').getContext('2d');
   const a=ax();
+
   if(dist.t==='c'){
-    const[x0,x1]=dist.xr(p);cachedXr=[x0,x1];
-    const N=80,lbs=[],pdfData=[];cachedMaxPdf=0;
-    for(let i=0;i<=N;i++){const x=x0+(x1-x0)*i/N;const y=dist.pdf(x,p);lbs.push(x.toFixed(3));pdfData.push(y);if(y>cachedMaxPdf)cachedMaxPdf=y;}
-    popChart=new Chart(ctx,{type:'line',data:{labels:lbs,datasets:[
-      {type:'line',data:pdfData,borderColor:'#5DCAA5',borderWidth:2,fill:true,backgroundColor:'rgba(93,202,165,0.15)',pointRadius:0,tension:0.3,order:3},
-      {type:'scatter',data:[],backgroundColor:'rgba(239,159,39,0.85)',borderColor:'#BA7517',borderWidth:1,pointRadius:4,order:1,parsing:false,xAxisID:'xlin',yAxisID:'y'},
-      {type:'scatter',data:[],borderColor:'#D85A30',borderWidth:2,borderDash:[5,4],pointRadius:0,fill:false,showLine:true,order:2,parsing:false,xAxisID:'xlin',yAxisID:'y'}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},
-      scales:{x:{...a,display:true},xlin:{...a,type:'linear',min:x0,max:x1,display:false},y:{...a,beginAtZero:true}},animation:false}});
+    // Pure linear x-axis — all three datasets use {x,y} with parsing:false
+    const[x0,x1]=dist.xr(p);
+    const N=120,pdfPts=[];
+    cachedMaxPdf=0;
+    for(let i=0;i<=N;i++){
+      const x=x0+(x1-x0)*i/N,y=dist.pdf(x,p);
+      pdfPts.push({x,y});
+      if(y>cachedMaxPdf)cachedMaxPdf=y;
+    }
+    popChart=new Chart(ctx,{
+      type:'scatter',
+      data:{datasets:[
+        {label:'pdf',type:'line',data:pdfPts,borderColor:'#5DCAA5',borderWidth:2,
+         backgroundColor:'rgba(93,202,165,0.15)',fill:true,pointRadius:0,tension:0.3,order:3,parsing:false},
+        {label:'dots',data:[],backgroundColor:'rgba(239,159,39,0.85)',
+         borderColor:'#BA7517',borderWidth:1,pointRadius:5,order:1,parsing:false},
+        {label:'meanline',data:[],borderColor:'#D85A30',borderWidth:2.5,
+         borderDash:[6,4],pointRadius:0,showLine:true,fill:false,order:2,parsing:false}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{enabled:false}},
+        scales:{x:{...a,type:'linear',min:x0,max:x1},y:{...a,beginAtZero:true}},
+        animation:false}
+    });
+
   } else {
-    const[x0,x1]=dist.xr(p);cachedKs=[];cachedPmfData=[];cachedMaxPmf=0;
-    for(let k=Math.floor(x0);k<=Math.ceil(x1);k++){cachedKs.push(k+'');const y=dist.pmf(k,p);cachedPmfData.push(y);if(y>cachedMaxPmf)cachedMaxPmf=y;}
-    popChart=new Chart(ctx,{type:'bar',data:{labels:cachedKs,datasets:[
-      {type:'bar',data:cachedPmfData,backgroundColor:'rgba(93,202,165,0.5)',borderColor:'#5DCAA5',borderWidth:1,barPercentage:0.85,categoryPercentage:0.9,order:3},
-      {type:'scatter',data:[],backgroundColor:'rgba(239,159,39,0.85)',borderColor:'#BA7517',borderWidth:1,pointRadius:4,order:1,parsing:false},
-      {type:'line',data:new Array(cachedKs.length).fill(null),borderColor:'#D85A30',borderWidth:2,borderDash:[5,4],pointRadius:0,fill:false,spanGaps:false,order:2}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},
-      scales:{x:{...a,grid:{display:false}},y:a},animation:false}});
+    const[x0,x1]=dist.xr(p);
+    cachedKs=[];cachedPmfData=[];cachedMaxPmf=0;
+    for(let k=Math.floor(x0);k<=Math.ceil(x1);k++){
+      cachedKs.push(k+'');
+      const y=dist.pmf(k,p);
+      cachedPmfData.push(y);
+      if(y>cachedMaxPmf)cachedMaxPmf=y;
+    }
+    popChart=new Chart(ctx,{
+      type:'bar',
+      data:{labels:cachedKs,datasets:[
+        {data:cachedPmfData,backgroundColor:'rgba(93,202,165,0.5)',borderColor:'#5DCAA5',
+         borderWidth:1,barPercentage:0.85,categoryPercentage:0.9,order:3},
+        {type:'scatter',data:[],backgroundColor:'rgba(239,159,39,0.85)',
+         borderColor:'#BA7517',borderWidth:1,pointRadius:5,order:1,parsing:false},
+        {type:'line',data:new Array(cachedKs.length).fill(null),
+         borderColor:'#D85A30',borderWidth:2.5,borderDash:[6,4],
+         pointRadius:0,fill:false,spanGaps:false,order:2}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{enabled:false}},
+        scales:{x:{...a,grid:{display:false}},y:a},
+        animation:false}
+    });
   }
 }
 
 function setPopOverlay(pts,mean){
   if(!popChart)return;
-  const dist=D[state.key],p=state.params;
+  const dist=D[state.key];
   const ds=popChart.data.datasets;
   if(dist.t==='c'){
     ds[1].data=pts?pts.map(v=>({x:v,y:0})):[];
-    ds[2].data=mean!=null?[{x:mean,y:0},{x:mean,y:cachedMaxPdf*1.1}]:[];
+    ds[2].data=mean!=null?[{x:mean,y:0},{x:mean,y:cachedMaxPdf*1.12}]:[];
   } else {
     if(pts){
-      const counts={};pts.forEach(v=>{const k=Math.round(v);counts[k]=(counts[k]||0)+1;});
-      ds[1].data=cachedKs.map((k,i)=>{const cnt=counts[parseInt(k)]||0;return cnt?{x:i,y:cachedPmfData[i]+0.01+(cnt*0.008)}:null;}).filter(Boolean);
-    } else {ds[1].data=[];}
+      const counts={};
+      pts.forEach(v=>{const k=Math.round(v);counts[k]=(counts[k]||0)+1;});
+      ds[1].data=cachedKs.map((k,i)=>{
+        const cnt=counts[parseInt(k)]||0;
+        return cnt?{x:i,y:cachedPmfData[i]+0.01+(cnt*0.008)}:null;
+      }).filter(Boolean);
+    }else{ds[1].data=[];}
     if(mean!=null){
-      const x0k=parseInt(cachedKs[0]),ni=Math.round(mean-x0k),ml=new Array(cachedKs.length).fill(null);
-      if(ni>=0&&ni<cachedKs.length)ml[ni]=cachedMaxPmf*1.1;
+      const x0k=parseInt(cachedKs[0]),ni=Math.round(mean-x0k);
+      const ml=new Array(cachedKs.length).fill(null);
+      if(ni>=0&&ni<cachedKs.length)ml[ni]=cachedMaxPmf*1.12;
       ds[2].data=ml;
-    } else {ds[2].data=new Array(cachedKs.length).fill(null);}
+    }else{ds[2].data=new Array(cachedKs.length).fill(null);}
   }
   popChart.update('none');
 }
@@ -473,7 +358,7 @@ function buildParams(){
   dist.params.forEach(pd=>{
     if(!(pd.id in state.params))state.params[pd.id]=pd.def;
     const row=document.createElement('div');row.className='prow';
-    row.innerHTML=`<span class="plabel">${pd.label}</span><input type="range" min="${pd.min}" max="${pd.max}" step="${pd.step}" value="${state.params[pd.id]}" id="ps_${pd.id}" style="width:100%;"><span class="pval" id="pv_${pd.id}">${state.params[pd.id]}</span>`;
+    row.innerHTML=`<span class="plabel">${pd.label}</span><input type="range" min="${pd.min}" max="${pd.max}" step="${pd.step}" value="${state.params[pd.id]}" style="width:100%;"><span class="pval" id="pv_${pd.id}">${state.params[pd.id]}</span>`;
     c.appendChild(row);
     row.querySelector('input').addEventListener('input',function(){
       let v=parseFloat(this.value);
@@ -552,6 +437,7 @@ document.getElementById('runBtn').addEventListener('click',function(){
 });
 
 document.getElementById('stepBtn').addEventListener('click',doStep);
+
 document.getElementById('resetBtn').addEventListener('click',()=>{
   halt();state.means=[];state.lastSample=null;state.lastMean=null;
   buildPopChart();initMeansChart();updateMeansChart();
